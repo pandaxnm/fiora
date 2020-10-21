@@ -8,6 +8,7 @@ import Socket from '../models/socket';
 
 import xss from '../../utils/xss';
 import { KoaContext } from '../../types/koa';
+import Friend from "../models/friend";
 
 const { isValid } = Types.ObjectId;
 
@@ -94,6 +95,25 @@ export async function sendMessage(ctx: KoaContext<SendMessageData>) {
             groupId: group._id,
             groupName: group.name,
         });
+    }
+
+    //如果是私聊，自动建立彼此好友关系
+    if(userId) {
+        const friend = await Friend.find({ from: ctx.socket.user, to: to });
+        if(!friend) {
+            const newFriend = await Friend.create({
+                from: ctx.socket.user,
+                to: to,
+            });
+        }
+
+        const friend1 = await Friend.find({ from: to, to: ctx.socket.user });
+        if(!friend1) {
+            const newFriend1 = await Friend.create({
+                from: to,
+                to: ctx.socket.user,
+            });
+        }
     }
 
     const message = await Message.create({
