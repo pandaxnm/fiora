@@ -103,7 +103,6 @@ export async function sendMessage(ctx: KoaContext<SendMessageData>) {
     if(userId && targetUser) {
         const friend1 = await Friend.findOne({from: ctx.socket.user.toString(), to: targetUser._id})
         if(!friend1) {
-            console.log('>>> not friend 1')
             const newFriend1 = await Friend.create({
                 from: ctx.socket.user,
                 to: targetUser._id,
@@ -112,7 +111,6 @@ export async function sendMessage(ctx: KoaContext<SendMessageData>) {
 
         const friend2 = await Friend.findOne({from: targetUser._id, to: ctx.socket.user.toString()})
         if(!friend2) {
-            console.log('>>> not friend 2')
             const newFriend2 = await Friend.create({
                 from: targetUser._id,
                 to: ctx.socket.user,
