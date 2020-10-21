@@ -42,6 +42,7 @@ export async function sendMessage(ctx: KoaContext<SendMessageData>) {
 
     let groupId = '';
     let userId = '';
+    let targetUser = null;
     if (isValid(to)) {
         groupId = to;
         const group = await Group.findOne({ _id: to });
@@ -50,6 +51,7 @@ export async function sendMessage(ctx: KoaContext<SendMessageData>) {
         userId = to.replace(ctx.socket.user.toString(), '');
         assert(isValid(userId), '无效的用户ID');
         const user = await User.findOne({ _id: userId });
+        targetUser = user;
         assert(user, '用户不存在');
     }
 
@@ -97,23 +99,26 @@ export async function sendMessage(ctx: KoaContext<SendMessageData>) {
         });
     }
 
-    //如果是私聊，自动建立彼此好友关系
-    if(userId) {
-        const friend = await Friend.find({ from: ctx.socket.user, to: to });
-        if(!friend) {
-            const newFriend = await Friend.create({
+    //如果是私聊，自动建立好友关系
+    if(userId && targetUser) {
+        const friend1 = await Friend.findOne({from: ctx.socket.user.toString(), to: targetUser._id})
+        if(!friend1) {
+            console.log('>>> not friend 1')
+            const newFriend1 = await Friend.create({
                 from: ctx.socket.user,
-                to: to,
+                to: targetUser._id,
             });
         }
 
-        const friend1 = await Friend.find({ from: to, to: ctx.socket.user });
-        if(!friend1) {
-            const newFriend1 = await Friend.create({
-                from: to,
+        const friend2 = await Friend.findOne({from: targetUser._id, to: ctx.socket.user.toString()})
+        if(!friend2) {
+            console.log('>>> not friend 2')
+            const newFriend2 = await Friend.create({
+                from: targetUser._id,
                 to: ctx.socket.user,
             });
         }
+
     }
 
     const message = await Message.create({
