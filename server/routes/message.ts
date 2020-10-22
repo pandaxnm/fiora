@@ -142,6 +142,9 @@ export async function sendMessage(ctx: KoaContext<SendMessageData>) {
     if (groupId) {
         ctx.socket.to(groupId).emit('message', messageData);
     } else {
+        if(targetUser) {
+            console.log(user.username + '->' + targetUser.username+"\n"+"messageContent")
+        }
         const sockets = await Socket.find({ user: userId });
         sockets.forEach((socket) => {
             ctx._io.to(socket.id).emit('message', messageData);
