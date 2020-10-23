@@ -23,6 +23,7 @@ router.post('/findUser',
 
 router.post('/register',
     async (ctx) => {
+        console.log(ctx.request.body)
         const {username, password, avatar} = ctx.request.body
         const user = await User.findOne({username: username})
         if(user) {
